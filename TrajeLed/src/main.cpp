@@ -5,7 +5,7 @@
 #include <Wire.h>
 
 
-#define DATA_PIN    21
+#define DATA_PIN    26
 #define LED_TYPE    WS2811
 #define COLOR_ORDER GRB
 #define NUM_LEDS    200
@@ -66,15 +66,29 @@ void blanco (){
   delay (1000);
 }
 
+void vacio(){
+  for (int i = 0; i < NUM_LEDS; i++)
+  {
+    leds[i] = CRGB :: Black;
+  }
+  FastLED.show();
+  delay(1000);
+}
+
 void loop() {
 
+
+
   if(mpu.getMotionInterruptStatus()) {
+    rojo();
+    blanco();
+    vacio();
+    
     /* Get new sensor events with the readings */
     sensors_event_t a, g, temp;
     mpu.getEvent(&a, &g, &temp); 
 
-    rojo();
-    blanco();
+    
 
     /* Print out the values */
     Serial.print("AccelX:");
