@@ -1,0 +1,143 @@
+#include <Arduino.h>
+#include <FastLED.h>
+#include <Adafruit_MPU6050.h>
+#include <Adafruit_Sensor.h>
+#include <Wire.h>
+
+
+#define DATA_PIN    26
+#define LED_TYPE    WS2811
+#define COLOR_ORDER GRB
+#define NUM_LEDS    200
+#define BRIGHTNESS  255
+
+CRGB leds[NUM_LEDS];
+
+Adafruit_MPU6050 mpu;
+
+void setup(void) {
+
+  FastLED.addLeds<LED_TYPE, DATA_PIN, COLOR_ORDER>(leds, NUM_LEDS)
+  .setCorrection(TypicalLEDStrip).setDither(BRIGHTNESS < 255);
+
+  fill_solid(leds, NUM_LEDS, CRGB:: Black);
+  FastLED.show();
+
+  Serial.begin(9600);
+  while (!Serial)
+    delay(10); // will pause Zero, Leonardo, etc until serial console opens
+
+  Serial.println("Adafruit MPU6050 test!");
+
+  // Try to initialize!
+  if (!mpu.begin()) {
+    Serial.println("Failed to find MPU6050 chip");
+    while (1) {
+      delay(10);
+    }
+  }
+  Serial.println("MPU6050 Found!");
+
+  //setupt motion detection
+  mpu.setHighPassFilter(MPU6050_HIGHPASS_0_63_HZ);
+  mpu.setMotionDetectionThreshold(1);
+  mpu.setMotionDetectionDuration(20);
+  mpu.setInterruptPinLatch(true);	// Keep it latched.  Will turn off when reinitialized.
+  mpu.setInterruptPinPolarity(true);
+  mpu.setMotionInterrupt(true);
+
+  Serial.println("");
+  delay(100);
+}
+
+void amarillo(){
+  for (int i = 0; i < NUM_LEDS; i++){
+    leds[i] = CRGB :: Yellow;
+  }
+  FastLED.show();
+  delay(1000);
+}
+
+
+void verde(){
+  for (int i = 0; i < NUM_LEDS; i++){
+    leds[i] = CRGB :: Green;
+  }
+  FastLED.show();
+  delay(1000);
+}
+
+
+void rojo(){
+  for (int i = 0; i < NUM_LEDS; i++){
+    leds[i] = CRGB :: Red;
+  }
+  FastLED.show();
+  delay(1000);
+}
+
+void blanco (){
+  for (int i = 0; i < NUM_LEDS; i ++){
+    leds[i] = CRGB :: White;
+  }
+  FastLED.show();
+  delay (1000);
+}
+
+void vacio(){
+  for (int i = 0; i < NUM_LEDS; i++)
+  {
+    leds[i] = CRGB :: Black;
+  }
+  FastLED.show();
+  delay(1000);
+}
+
+void loop() {
+
+   
+
+  if(mpu.getMotionInterruptStatus()) {
+    
+    /* Get new sensor events with the readings */
+    sensors_event_t a, g, temp;
+    mpu.getEvent(&a, &g, &temp); 
+
+
+    /* Print out the values */
+    Serial.print("AccelX:");
+    Serial.print(a.acceleration.x);
+    Serial.print(",");
+    Serial.print("AccelY:");
+    Serial.print(a.acceleration.y);
+    Serial.print(",");
+    Serial.print("AccelZ:");
+    Serial.print(a.acceleration.z);
+    Serial.print(", ");
+    Serial.print("GyroX:");
+    Serial.print(g.gyro.x);
+    Serial.print(",");
+    Serial.print("GyroY:");
+    Serial.print(g.gyro.y);
+    Serial.print(",");
+    Serial.print("GyroZ:");
+    Serial.print(g.gyro.z);
+    Serial.println("");
+
+
+    if ( a.acceleration.y > 9){
+      rojo();
+      blanco();
+      vacio();   
+    }   
+    else if (a.acceleration.y < -5)
+    {
+      amarillo();
+      verde();
+      vacio();
+    }
+    
+  }
+
+  delay(100);
+}
